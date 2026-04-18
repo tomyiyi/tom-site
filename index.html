@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yom — AI Agent & 自动化专家</title>
+  <meta name="description" content="专注 AI Agent 系统搭建、自动化工作流、企业 AI 转型">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a24;
+      --accent: #6366f1;
+      --accent-light: #818cf8;
+      --accent-glow: rgba(99, 102, 241, 0.3);
+      --text-primary: #f1f1f3;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --border: #2a2a3a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* 背景网格 */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        linear-gradient(90deg, var(--border) 1px, transparent 1px),
+        linear-gradient(var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* 导航 */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 16px 0;
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-light);
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 120px 0 80px;
+      position: relative;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 20%;
+      right: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .hero h1 {
+      font-size: 56px;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      max-width: 480px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-light);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent-light);
+    }
+
+    .hero-image {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .hero-image img {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hero-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 50%, var(--bg-primary) 100%);
+    }
+
+    /* 通用区块 */
+    section {
+      padding: 100px 0;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* 服务区块 */
+    #services {
+      background: var(--bg-secondary);
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .service-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      transition: all 0.3s;
+    }
+
+    .service-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .service-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .service-card h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .service-card p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .service-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .service-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 4px 10px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    /* 技术栈 */
+    #tech {
+      background: var(--bg-primary);
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .tech-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .tech-item:hover {
+      border-color: var(--accent);
+    }
+
+    .tech-item .icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .tech-item h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .tech-item p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* 作品展示 */
+    #works {
+      background: var(--bg-secondary);
+    }
+
+    .works-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .work-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .work-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+    }
+
+    .work-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .work-content {
+      padding: 24px;
+    }
+
+    .work-content h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .work-content p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .work-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* 关于我 */
+    #about {
+      background: var(--bg-primary);
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .about-image {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .about-image img {
+      width: 100%;
+      height: 500px;
+      object-fit: cover;
+    }
+
+    .about-content h2 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    .about-content p {
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      font-size: 15px;
+    }
+
+    .about-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 40px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+    }
+
+    .stat h4 {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .stat p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* 联系 */
+    #contact {
+      background: var(--bg-secondary);
+      text-align: center;
+    }
+
+    .contact-box {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .contact-box h2 {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .contact-box p {
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+    }
+
+    .contact-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .contact-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .contact-link:hover {
+      border-color: var(--accent);
+      color: var(--accent-light);
+    }
+
+    .contact-link .icon {
+      font-size: 20px;
+    }
+
+    .email-link {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      color: var(--accent);
+      text-decoration: none;
+      padding: 16px 32px;
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .email-link:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* 页脚 */
+    footer {
+      background: var(--bg-primary);
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .hero h1 {
+        font-size: 40px;
+      }
+
+      .hero-image {
+        order: -1;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tech-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .works-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .about-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .about-image img {
+        height: 300px;
+      }
+
+      .about-stats {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      section {
+        padding: 60px 0;
+      }
+
+      .contact-links {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 导航 -->
+  <nav>
+    <div class="container">
+      <a href="#" class="logo">&lt;Yom /&gt;</a>
+      <ul class="nav-links">
+        <li><a href="#services">服务</a></li>
+        <li><a href="#tech">技术</a></li>
+        <li><a href="#works">作品</a></li>
+        <li><a href="#about">关于</a></li>
+        <li><a href="#contact">联系</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <div class="hero-badge">Available for Projects</div>
+          <h1>你好，我是 <span>Yom</span></h1>
+          <p class="hero-subtitle">AI Agent 系统搭建专家，专注帮助企业&个人用 AI 自动化工作流，提升效率，降低成本</p>
+          <div class="hero-buttons">
+            <a href="#contact" class="btn btn-primary">找我合作 →</a>
+            <a href="#works" class="btn btn-secondary">查看作品</a>
+          </div>
+        </div>
+        <div class="hero-image">
+          <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80" alt="AI Neural Network">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 服务 -->
+  <section id="services">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">What I Do</p>
+        <h2 class="section-title">我能帮你做什么</h2>
+        <p class="section-desc">从 AI 咨询到系统落地，提供一站式解决方案</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon">🤖</div>
+          <h3>AI Agent 开发</h3>
+          <p>基于 Hermes / Claude Agent 等框架，搭建定制化 AI Agent 系统</p>
+          <div class="service-tags">
+            <span class="service-tag">Hermes</span>
+            <span class="service-tag">Claude Code</span>
+            <span class="service-tag">MCP</span>
+          </div>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">⚡</div>
+          <h3>自动化工作流</h3>
+          <p>设计并实现业务流程自动化，节省重复性工作时间</p>
+          <div class="service-tags">
+            <span class="service-tag">n8n</span>
+            <span class="service-tag">Python</span>
+            <span class="service-tag">API</span>
+          </div>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">🚀</div>
+          <h3>企业 AI 转型</h3>
+          <p>帮助企业梳理业务流程，制定 AI 落地路径，快速见到成效</p>
+          <div class="service-tags">
+            <span class="service-tag">咨询</span>
+            <span class="service-tag">培训</span>
+            <span class="service-tag">落地</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 技术栈 -->
+  <section id="tech">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">Tech Stack</p>
+        <h2 class="section-title">我用哪些技术</h2>
+        <p class="section-desc">熟悉主流 AI 工具和开发框架</p>
+      </div>
+      <div class="tech-grid">
+        <div class="tech-item">
+          <div class="icon">🦾</div>
+          <h4>Hermes Agent</h4>
+          <p>AI Agent 框架</p>
+        </div>
+        <div class="tech-item">
+          <div class="icon">🧠</div>
+          <h4>Claude</h4>
+          <p>大语言模型</p>
+        </div>
+        <div class="tech-item">
+          <div class="icon">⚙️</div>
+          <h4>MCP 协议</h4>
+          <p>工具集成协议</p>
+        </div>
+        <div class="tech-item">
+          <div class="icon">🐍</div>
+          <h4>Python</h4>
+          <p>后端开发</p>
+        </div>
+        <div class="tech-item">
+          <div class="icon">🌊</div>
+          <h4>n8n</h4>
+          <p>工作流自动化</p>
+        </div>
+        <div class="tech-item">
+          <div class="icon">🔌</div>
+          <h4>API 集成</h4>
+          <p>第三方服务对接</p>
+        </div>
+        <div class="tech-item">
+          <div class="icon">📊</div>
+          <h4>飞书/钉钉</h4>
+          <p>办公平台集成</p>
+        </div>
+        <div class="tech-item">
+          <div class="icon">☁️</div>
+          <h4>GitHub Pages</h4>
+          <p>网站部署</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 作品 -->
+  <section id="works">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">Works</p>
+        <h2 class="section-title">代表作品</h2>
+        <p class="section-desc">实际落地案例，展示真实能力</p>
+      </div>
+      <div class="works-grid">
+        <div class="work-card">
+          <img class="work-image" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80" alt="数据仪表盘">
+          <div class="work-content">
+            <h3>企业 AI 客服系统</h3>
+            <p>为某科技公司搭建基于 Claude 的智能客服，日均处理 500+ 咨询，问题准确率 92%</p>
+            <div class="work-tags">
+              <span class="service-tag">Claude</span>
+              <span class="service-tag">客服</span>
+              <span class="service-tag">n8n</span>
+            </div>
+          </div>
+        </div>
+        <div class="work-card">
+          <img class="work-image" src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80" alt="自动化流程">
+          <div class="work-content">
+            <h3>跨境电商运营自动化</h3>
+            <p>实现选品、上架、客服全流程自动化，人力成本降低 60%，响应速度提升 3 倍</p>
+            <div class="work-tags">
+              <span class="service-tag">自动化</span>
+              <span class="service-tag">电商</span>
+              <span class="service-tag">Python</span>
+            </div>
+          </div>
+        </div>
+        <div class="work-card">
+          <img class="work-image" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80" alt="服务器">
+          <div class="work-content">
+            <h3>AI 个人助手部署</h3>
+            <p>为个人品牌博主搭建 AI 工作助手，实现内容创作、社群运营、数据分析的自动化</p>
+            <div class="work-tags">
+              <span class="service-tag">Hermes</span>
+              <span class="service-tag">飞书</span>
+              <span class="service-tag">个人品牌</span>
+            </div>
+          </div>
+        </div>
+        <div class="work-card">
+          <img class="work-image" src="https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=800&q=80" alt="数据分析">
+          <div class="work-content">
+            <h3>数据采集分析平台</h3>
+            <p>搭建全链路数据采集清洗分析系统，支持实时可视化报表，决策效率提升 40%</p>
+            <div class="work-tags">
+              <span class="service-tag">Python</span>
+              <span class="service-tag">数据</span>
+              <span class="service-tag">API</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 关于我 -->
+  <section id="about">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-image">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80" alt="工作场景">
+        </div>
+        <div class="about-content">
+          <h2>关于我</h2>
+          <p>6年+互联网产品&技术经验，深度研究 AI Agent 领域，专注用技术解决实际问题。</p>
+          <p>曾帮助 30+ 企业和个人实现 AI 转型，擅长从需求分析到系统落地的全流程服务。</p>
+          <p>我相信 AI 不是取代人，而是放大人的能力。让 AI 做重复的事，让人做有创造价值的事。</p>
+          <div class="about-stats">
+            <div class="stat">
+              <h4>30+</h4>
+              <p>服务客户</p>
+            </div>
+            <div class="stat">
+              <h4>6年+</h4>
+              <p>行业经验</p>
+            </div>
+            <div class="stat">
+              <h4>100+</h4>
+              <p>完成项目</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 联系 -->
+  <section id="contact">
+    <div class="container">
+      <div class="contact-box">
+        <p class="section-label">Contact</p>
+        <h2>准备好开始了吗？</h2>
+        <p>有任何项目想法或合作机会，欢迎联系我。<br>我会根据你的需求，提供专业建议和方案。</p>
+        <div class="contact-links">
+          <a href="mailto:hello@yom.ai" class="contact-link">
+            <span class="icon">📧</span>
+            <span>hello@yom.ai</span>
+          </a>
+          <a href="https://github.com/yom" class="contact-link">
+            <span class="icon">💻</span>
+            <span>GitHub</span>
+          </a>
+          <a href="https://twitter.com/yom" class="contact-link">
+            <span class="icon">🐦</span>
+            <span>Twitter</span>
+          </a>
+        </div>
+        <a href="mailto:hello@yom.ai" class="email-link">发邮件给我 →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页脚 -->
+  <footer>
+    <div class="container">
+      <p>Designed & Built by <a href="#">Yom</a> · © 2026</p>
+    </div>
+  </footer>
+</body>
+</html>
